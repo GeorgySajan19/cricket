@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Stick Cricket Supreme</title>
+  <title>Stick Cricket Elite</title>
   <style>
     body {
       margin:0; padding:0;
@@ -15,101 +15,49 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    #game { display:block; background:#0a1f0a; }
-    #overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 20;
-    }
+    #game { display:block; }
+    #overlay { position:absolute; inset:0; pointer-events:none; z-index:20; }
     #ui {
-      position: absolute;
-      top: 8px; left: 12px; right: 12px;
-      z-index: 15;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.4rem;
-      text-shadow: 0 0 6px #000, 0 0 12px #000;
+      position:absolute; top:8px; left:12px; right:12px; z-index:15;
+      display:flex; justify-content:space-between; font-size:1.5rem;
+      text-shadow:0 0 8px #000;
     }
     #status {
-      position: absolute;
-      top: 42%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 6.5vw;
-      font-weight: bold;
-      color: #ffeb3b;
-      text-shadow: 0 0 20px #000;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.4s;
+      position:absolute; top:40%; left:50%; transform:translate(-50%,-50%);
+      font-size:8vw; font-weight:bold; color:#ffeb3b;
+      text-shadow:0 0 25px #000; pointer-events:none; opacity:0;
+      transition:opacity 0.5s;
     }
-    #menu, #gameover {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #0f0;
-      z-index: 30;
-      pointer-events: all;
+    #menu, #gameover, #modeSelect {
+      position:absolute; inset:0; background:rgba(0,0,0,0.88);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      color:#0f0; z-index:30; pointer-events:all;
     }
-    #menu h1, #gameover h1 {
-      font-size: 9vw;
-      margin: 0.2em 0;
-      text-shadow: 0 0 15px #0f0;
-    }
+    h1 { font-size:10vw; margin:0.3em 0; text-shadow:0 0 20px #0f0; }
     button {
-      font-size: 5.5vw;
-      padding: 14px 32px;
-      margin: 12px;
-      min-width: 220px;
-      background: #111;
-      color: #0f0;
-      border: 3px solid #0f0;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.15s;
+      font-size:6vw; padding:16px 40px; margin:14px;
+      min-width:260px; background:#111; color:#0f0;
+      border:3px solid #0f0; border-radius:14px;
+      transition:all 0.18s;
     }
-    button:active { transform: scale(0.94); background: #0a300a; }
-    #stats {
-      font-size: 4.2vw;
-      line-height: 1.5;
-      text-align: center;
-      margin: 1em 0;
-      color: #8f8;
-    }
+    button:active { transform:scale(0.95); background:#0a400a; }
+    #stats { font-size:4.8vw; line-height:1.6; text-align:center; margin:1.2em 0; color:#9f9; }
     #controls {
-      position: absolute;
-      bottom: 16px;
-      left: 0; right: 0;
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      z-index: 10;
-      pointer-events: all;
+      position:absolute; bottom:18px; left:0; right:0;
+      display:flex; justify-content:center; gap:20px; z-index:10; pointer-events:all;
     }
     .shot-btn {
-      font-size: 5vw;
-      padding: 16px 28px;
-      background: rgba(20,40,20,0.7);
-      border: 2px solid #0c5;
-      border-radius: 50%;
-      width: 110px; height: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
+      font-size:5.2vw; width:120px; height:120px;
+      background:rgba(20,50,20,0.75); border:3px solid #0c6;
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      backdrop-filter:blur(5px);
     }
-    #straightBtn { font-size: 4.8vw; width: 140px; height: 140px; border-color: #0f0; }
+    #straightBtn { width:150px; height:150px; border-color:#0f0; font-size:5vw; }
+    .particle { position:absolute; pointer-events:none; font-size:5vw; font-weight:bold; color:#ff0; opacity:0; }
 
-    @media (orientation: landscape) {
-      #controls { bottom: 8px; }
-      .shot-btn { width: 90px; height: 90px; font-size: 4vw; }
-      #straightBtn { width: 120px; height: 120px; }
+    @media (orientation:landscape) {
+      .shot-btn { width:100px; height:100px; font-size:4.2vw; }
+      #straightBtn { width:130px; height:130px; }
     }
   </style>
 </head>
@@ -120,23 +68,31 @@
     <div id="ui">
       <div>Score: <span id="score">0</span></div>
       <div>Wickets: <span id="wickets">0</span>/3</div>
+      <div>Combo: <span id="combo">0</span>x</div>
     </div>
 
     <div id="status"></div>
 
     <div id="controls" style="display:none">
-      <div class="shot-btn" id="leftBtn">COVER</div>
+      <div class="shot-btn" id="leftBtn">DEFEND</div>
       <div class="shot-btn" id="straightBtn">DRIVE</div>
       <div class="shot-btn" id="rightBtn">LOFT</div>
     </div>
 
-    <div id="menu">
-      <h1>STICK CRICKET</h1>
-      <button id="startBtn">START GAME</button>
-      <div style="margin-top:2em; font-size:4vw; opacity:0.7;">
-        Tap zones or buttons to play<br>
-        Try to beat your high score!
+    <div id="modeSelect">
+      <h1>STICK CRICKET ELITE</h1>
+      <p style="font-size:5vw; margin:1em 0;">Choose mode:</p>
+      <button id="mode10">10 overs (30 balls)</button>
+      <button id="mode20">20 overs (60 balls)</button>
+      <button id="modeEndless">Endless</button>
+      <div style="margin-top:2em; font-size:4.5vw; opacity:0.8;">
+        Hit perfect timing for SIXES!
       </div>
+    </div>
+
+    <div id="menu" style="display:none">
+      <h1>STICK CRICKET ELITE</h1>
+      <button id="startBtn">PLAY AGAIN</button>
     </div>
 
     <div id="gameover" style="display:none">
@@ -151,68 +107,87 @@
   const ctx = canvas.getContext('2d');
   const scoreEl = document.getElementById('score');
   const wicketsEl = document.getElementById('wickets');
+  const comboEl  = document.getElementById('combo');
   const statusEl = document.getElementById('status');
+  const modeSelect = document.getElementById('modeSelect');
   const menu = document.getElementById('menu');
   const gameover = document.getElementById('gameover');
   const controls = document.getElementById('controls');
   const statsEl = document.getElementById('stats');
 
-  let state = 'menu'; // menu | playing | gameover
-  let score = 0;
-  let wickets = 0;
-  let ballsFaced = 0;
-  let sixes = 0;
-  let fours = 0;
-  let highScore = Number(localStorage.getItem('stickCricketHigh') || 0);
+  let state = 'mode'; // mode | playing | gameover
+  let score = 0, wickets = 0, ballsFaced = 0, sixes = 0, fours = 0;
+  let combo = 0, maxCombo = 0, multiplier = 1;
+  let highScore = Number(localStorage.getItem('stickCricketEliteHigh') || 0);
+  let maxBalls = Infinity; // endless by default
+  let ballCountThisWicket = 0;
 
-  let ball = { x:0, y:0, vx:0, vy:0, radius:14 };
-  const batsman = { x:0, y:0, batAngle:0, swinging:false, swingTimer:0 };
+  let ball = { x:0, y:0, vx:0, vy:0, radius:15 };
+  const batsman = { x:0, y:0, batAngle:0, swinging:false, swingTimer:0, perfect:false };
   let shotType = 'straight';
+  let difficultySpeed = 7; // starts here, increases slowly
 
-  const perfectZone = { min:280, max:360 };
-  const goodZone   = { min:210, max:430 };
+  const perfectZone = { min:285, max:355 };
+  const goodZone   = { min:215, max:425 };
+  const perfectWindow = 6; // frames (~0.1s) for perfect timing
+
+  // Particles for crowd cheers
+  let particles = [];
+
+  function createParticle(x, y, text, color = '#ff0') {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = text;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.color = color;
+    document.body.appendChild(p);
+    setTimeout(() => {
+      p.style.transition = 'all 1.2s';
+      p.style.opacity = 0;
+      p.style.transform = 'translateY(-120px) scale(1.4)';
+      setTimeout(() => p.remove(), 1300);
+    }, 100);
+  }
 
   // ────────────────────────────────────────────────
-  //  Resize & Layout
+  // Resize
   // ────────────────────────────────────────────────
   function resize() {
-    let w = window.innerWidth;
-    let h = window.innerHeight;
-    const ratio = 16/9.3;
+    let w = window.innerWidth, h = window.innerHeight;
+    const ratio = 16 / 9.4;
+    if (w / h > ratio) { canvas.height = h; canvas.width = h * ratio; }
+    else { canvas.width = w; canvas.height = w / ratio; }
 
-    if (w / h > ratio) {
-      canvas.height = h;
-      canvas.width = Math.round(h * ratio);
-    } else {
-      canvas.width = w;
-      canvas.height = Math.round(w / ratio);
-    }
-
-    batsman.x = canvas.width * 0.18;
-    batsman.y = canvas.height * 0.64;
-
-    ball.x = canvas.width + 80;
-    ball.y = 140 + Math.random() * (canvas.height * 0.38);
+    batsman.x = canvas.width * 0.16;
+    batsman.y = canvas.height * 0.63;
+    ball.x = canvas.width + 100;
+    ball.y = 100 + Math.random() * (canvas.height * 0.45);
   }
   window.addEventListener('resize', resize);
   resize();
 
-  // ────────────────────────────────────────────────
-  //  Game Logic
-  // ────────────────────────────────────────────────
   function resetBall() {
     ballsFaced++;
-    ball.x = canvas.width + 80;
-    ball.y = 120 + Math.random() * (canvas.height * 0.42);
-    ball.vx = - (7 + Math.random() * 5.5);
-    ball.vy = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 3.5);
+    ballCountThisWicket++;
+    ball.x = canvas.width + 100;
+    ball.y = 100 + Math.random() * (canvas.height * 0.48);
+    ball.vx = - (difficultySpeed + Math.random() * 4);
+    ball.vy = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 4);
+
+    // Difficulty ramp
+    if (ballsFaced % 10 === 0 && difficultySpeed < 13) {
+      difficultySpeed += 0.6;
+    }
   }
 
-  function startGame() {
+  function startGame(ballsLimit = Infinity) {
+    maxBalls = ballsLimit;
     score = 0; wickets = 0; ballsFaced = 0; sixes = 0; fours = 0;
-    scoreEl.textContent = 0;
-    wicketsEl.textContent = 0;
+    combo = 0; maxCombo = 0; multiplier = 1; difficultySpeed = 7;
+    scoreEl.textContent = 0; wicketsEl.textContent = 0; comboEl.textContent = 0;
     state = 'playing';
+    modeSelect.style.display = 'none';
     menu.style.display = 'none';
     gameover.style.display = 'none';
     controls.style.display = 'flex';
@@ -224,16 +199,15 @@
     controls.style.display = 'none';
     if (score > highScore) {
       highScore = score;
-      localStorage.setItem('stickCricketHigh', highScore);
+      localStorage.setItem('stickCricketEliteHigh', highScore);
     }
-
     statsEl.innerHTML = `
       Score: <b>${score}</b><br>
-      ${score > highScore ? '<span style="color:#ff0">NEW HIGH SCORE!</span><br>' : ''}
+      ${score > highScore ? '<span style="color:#ff0">NEW RECORD!</span><br>' : ''}
       High Score: ${highScore}<br><br>
-      Balls faced: ${ballsFaced}<br>
+      Balls: ${ballsFaced}  •  Max Combo: ${maxCombo}x<br>
       Fours: ${fours}  •  Sixes: ${sixes}<br>
-      Strike rate: ${ballsFaced ? Math.round(score / ballsFaced * 100) : 0}
+      Strike Rate: ${ballsFaced ? Math.round(score / ballsFaced * 100) : 0}
     `;
     gameover.style.display = 'flex';
   }
@@ -242,74 +216,93 @@
     if (state !== 'playing' || batsman.swinging) return;
     shotType = type;
     batsman.swinging = true;
-    batsman.batAngle = 75;
+    batsman.batAngle = 82;
     batsman.swingTimer = 0;
+    batsman.perfect = (ball.x > batsman.x + 220 && ball.x < batsman.x + 300); // very tight timing window
   }
 
   // ────────────────────────────────────────────────
-  //  Update & Draw
+  // Update
   // ────────────────────────────────────────────────
   function update() {
     if (state !== 'playing') return;
 
     ball.x += ball.vx;
     ball.y += ball.vy;
-
-    if (ball.y < 80 || ball.y > canvas.height - 80) ball.vy *= -0.65;
+    if (ball.y < 60 || ball.y > canvas.height - 60) ball.vy *= -0.7;
 
     if (batsman.swinging) {
-      batsman.batAngle -= 14;
+      batsman.batAngle -= 16;
       batsman.swingTimer++;
-      if (batsman.swingTimer > 7) {
+      if (batsman.swingTimer > 8) {
         batsman.swinging = false;
         batsman.batAngle = 0;
       }
     }
 
-    // missed ball → wicket
-    if (ball.x < batsman.x - 100) {
+    // Miss / wicket
+    if (ball.x < batsman.x - 120) {
       wickets++;
       wicketsEl.textContent = wickets;
-      showStatus("OUT!", "red", 1400);
+      showStatus("OUT!", "red", 1600);
+      combo = 0; multiplier = 1; comboEl.textContent = 0;
+      ballCountThisWicket = 0;
 
-      if (wickets >= 3) {
+      if (wickets >= 3 || (maxBalls !== Infinity && ballsFaced >= maxBalls)) {
         endGame();
       } else {
         resetBall();
       }
     }
 
-    // hit detection
+    // Hit!
     if (batsman.swinging &&
-        ball.x > batsman.x - 10 &&
-        ball.x < batsman.x + 140 &&
-        Math.abs(ball.y - (batsman.y - 45)) < 85) {
+        ball.x > batsman.x - 20 &&
+        ball.x < batsman.x + 160 &&
+        Math.abs(ball.y - (batsman.y - 50)) < 90) {
 
-      let runs = 0;
-      let msg = "";
-      let color = "#ffeb3b";
+      let runs = 0, msg = "", color = "#ffeb3b", isBig = false;
+
+      const timingBonus = batsman.perfect ? 1.5 : 1;
 
       if (ball.y >= perfectZone.min && ball.y <= perfectZone.max) {
         runs = (shotType === 'right') ? 6 : 4;
-        msg = runs === 6 ? "SIX!" : "FOUR!";
-        color = runs === 6 ? "#0f0" : "#ffeb3b";
+        msg = (runs === 6) ? "SIX!" : "FOUR!";
+        color = (runs === 6) ? "#0f0" : "#ffeb3b";
+        isBig = true;
         if (runs === 6) sixes++; else fours++;
       } else if (ball.y >= goodZone.min && ball.y <= goodZone.max) {
         runs = shotType === 'left' ? 2 : (shotType === 'right' ? 4 : 3);
-        msg = runs + " runs";
+        msg = runs + (runs === 1 ? " run" : " runs");
         if (runs === 4) fours++;
       } else {
         runs = 1;
         msg = "Single";
       }
 
+      runs = Math.round(runs * timingBonus * multiplier);
       score += runs;
       scoreEl.textContent = score;
-      showStatus(msg, color, 1600);
 
-      // send ball away
-      ball.vx = 12 + Math.random() * 14;
-      ball.vy = - (shotType === 'right' ? 14 : 7) + Math.random() * 10 - 5;
+      // Combo system
+      if (runs >= 4) {
+        combo++;
+        if (combo > maxCombo) maxCombo = combo;
+        multiplier = 1 + (combo * 0.15);
+        comboEl.textContent = combo;
+      } else {
+        combo = 0; multiplier = 1; comboEl.textContent = 0;
+      }
+
+      showStatus(msg + (timingBonus > 1 ? " PERFECT!" : ""), color, 1800);
+
+      if (isBig) {
+        createParticle(canvas.width/2, canvas.height*0.3, msg, color);
+      }
+
+      // Ball flies away
+      ball.vx = 14 + Math.random() * 16;
+      ball.vy = - (shotType === 'right' ? 16 : 8) + Math.random() * 12 - 6;
 
       resetBall();
     }
@@ -319,65 +312,77 @@
     statusEl.textContent = text;
     statusEl.style.color = color;
     statusEl.style.opacity = 1;
-    setTimeout(() => { statusEl.style.opacity = 0; }, ms - 400);
+    setTimeout(() => statusEl.style.opacity = 0, ms - 500);
   }
 
+  // ────────────────────────────────────────────────
+  // Draw
+  // ────────────────────────────────────────────────
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // sky
-    const grad = ctx.createLinearGradient(0,0,0,canvas.height*0.75);
-    grad.addColorStop(0, '#4fc3f7');
-    grad.addColorStop(1, '#81d4fa');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.75);
+    // Night stadium gradient
+    const sky = ctx.createLinearGradient(0,0,0,canvas.height*0.8);
+    sky.addColorStop(0, '#0b1e3f');
+    sky.addColorStop(0.5, '#1e3a5f');
+    sky.addColorStop(1, '#0a2a0a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // pitch
-    ctx.fillStyle = '#5d4037';
-    ctx.fillRect(0, canvas.height * 0.74, canvas.width, canvas.height);
+    // Floodlights effect
+    ctx.fillStyle = 'rgba(255,240,180,0.08)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height*0.4);
 
-    // grass hint
-    ctx.fillStyle = 'rgba(0,80,0,0.4)';
-    ctx.fillRect(0, canvas.height * 0.74, canvas.width, canvas.height);
+    // Pitch
+    ctx.fillStyle = '#4a2c1a';
+    ctx.fillRect(0, canvas.height*0.72, canvas.width, canvas.height*0.28);
 
-    // wickets
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 7;
-    const wx = batsman.x + 45;
+    // Grass edges
+    ctx.fillStyle = 'rgba(0,100,0,0.5)';
+    ctx.fillRect(0, canvas.height*0.72, canvas.width, canvas.height*0.28);
+
+    // Wickets
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = 8;
+    const wx = batsman.x + 50;
     ctx.beginPath();
-    ctx.moveTo(wx-22, batsman.y-90); ctx.lineTo(wx-22, batsman.y+25);
-    ctx.moveTo(wx,    batsman.y-90); ctx.lineTo(wx,    batsman.y+25);
-    ctx.moveTo(wx+22, batsman.y-90); ctx.lineTo(wx+22, batsman.y+25);
+    ctx.moveTo(wx-25, batsman.y-100); ctx.lineTo(wx-25, batsman.y+30);
+    ctx.moveTo(wx,    batsman.y-100); ctx.lineTo(wx,    batsman.y+30);
+    ctx.moveTo(wx+25, batsman.y-100); ctx.lineTo(wx+25, batsman.y+30);
     ctx.stroke();
 
-    // batsman
+    // Batsman (with follow-through)
     ctx.fillStyle = '#0f0';
-    ctx.beginPath(); ctx.arc(batsman.x, batsman.y-85, 26, 0, Math.PI*2); ctx.fill();
-    ctx.fillRect(batsman.x-16, batsman.y-60, 32, 85);
-    ctx.lineWidth = 12; ctx.strokeStyle = '#0f0';
-    ctx.beginPath(); ctx.moveTo(batsman.x-8, batsman.y+20); ctx.lineTo(batsman.x-60, batsman.y+95); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(batsman.x+8, batsman.y+20); ctx.lineTo(batsman.x+40, batsman.y+100); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(batsman.x-12, batsman.y-35); ctx.lineTo(batsman.x+55, batsman.y-15); ctx.stroke();
+    ctx.beginPath(); ctx.arc(batsman.x, batsman.y-90, 28, 0, Math.PI*2); ctx.fill(); // head
+    ctx.fillRect(batsman.x-18, batsman.y-65, 36, 90); // body
+    ctx.lineWidth = 14; ctx.strokeStyle = '#0f0';
+    ctx.beginPath(); ctx.moveTo(batsman.x-10, batsman.y+22); ctx.lineTo(batsman.x-70, batsman.y+110); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(batsman.x+10, batsman.y+22); ctx.lineTo(batsman.x+50, batsman.y+115); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(batsman.x-15, batsman.y-40); ctx.lineTo(batsman.x+65, batsman.y-20); ctx.stroke(); // arm
 
-    // bat
+    // Bat
     ctx.save();
-    ctx.translate(batsman.x + 38, batsman.y - 35);
+    ctx.translate(batsman.x + 42, batsman.y - 38);
     ctx.rotate(batsman.batAngle * Math.PI / 180);
-    ctx.fillStyle = '#6d4c41';
-    ctx.fillRect(-8, -18, 110, 36);
+    ctx.fillStyle = '#8b5a2b';
+    ctx.fillRect(-10, -20, 120, 40);
     ctx.restore();
 
-    // ball + trail
-    ctx.fillStyle = 'rgba(220,40,40,0.35)';
-    ctx.beginPath(); ctx.arc(ball.x + ball.vx*1.8, ball.y + ball.vy*1.8, ball.radius*1.8, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#d32f2f';
+    // Ball shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath(); ctx.ellipse(ball.x + 8, ball.y + 20 + Math.abs(ball.vy)*1.5, ball.radius*1.4, ball.radius*0.6, 0, 0, Math.PI*2); ctx.fill();
+
+    // Ball trail
+    ctx.fillStyle = 'rgba(240,60,60,0.4)';
+    ctx.beginPath(); ctx.arc(ball.x + ball.vx*2, ball.y + ball.vy*2, ball.radius*2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#e53935';
     ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fill();
 
-    // shot arc
-    ctx.strokeStyle = shotType === 'left' ? '#2196f3' : shotType === 'right' ? '#ff9800' : '#0f0';
-    ctx.lineWidth = 9;
+    // Shot arc indicator
+    ctx.strokeStyle = shotType === 'left' ? '#42a5f5' : shotType === 'right' ? '#fb8c00' : '#66ff00';
+    ctx.lineWidth = 10;
     ctx.beginPath();
-    ctx.arc(batsman.x + 55, batsman.y - 55, 70, Math.PI*0.75, Math.PI*0.25, true);
+    ctx.arc(batsman.x + 60, batsman.y - 60, 80, Math.PI*0.7, Math.PI*0.3, true);
     ctx.stroke();
   }
 
@@ -388,10 +393,13 @@
   }
 
   // ────────────────────────────────────────────────
-  //  Controls
+  // Controls
   // ────────────────────────────────────────────────
-  document.getElementById('startBtn').onclick = startGame;
-  document.getElementById('restartBtn').onclick = startGame;
+  document.getElementById('mode10').onclick     = () => startGame(30);
+  document.getElementById('mode20').onclick    = () => startGame(60);
+  document.getElementById('modeEndless').onclick = () => startGame(Infinity);
+  document.getElementById('startBtn').onclick   = () => modeSelect.style.display = 'flex';
+  document.getElementById('restartBtn').onclick = () => modeSelect.style.display = 'flex';
 
   function onSwingLeft()  { swing('left'); }
   function onSwingStr()   { swing('straight'); }
@@ -401,31 +409,27 @@
   document.getElementById('straightBtn').addEventListener('touchstart', e => { e.preventDefault(); onSwingStr(); });
   document.getElementById('rightBtn').addEventListener('touchstart', e => { e.preventDefault(); onSwingRight(); });
 
-  // Keyboard support
   window.addEventListener('keydown', e => {
     if (e.code === 'ArrowLeft'  || e.code === 'KeyA') onSwingLeft();
-    if (e.code === 'Space'      || e.code === 'ArrowUp' || e.code === 'KeyW') onSwingStr();
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') onSwingStr();
     if (e.code === 'ArrowRight' || e.code === 'KeyD') onSwingRight();
   });
 
-  // Tap to start
   canvas.addEventListener('touchstart', e => {
-    if (state === 'menu') {
+    if (state === 'mode') {
       e.preventDefault();
-      startGame();
+      modeSelect.style.display = 'none';
+      startGame(Infinity);
     }
   }, { passive: false });
 
-  // Optional fullscreen
-  function tryFullscreen() {
-    if (canvas.requestFullscreen && document.fullscreenElement === null) {
-      canvas.requestFullscreen().catch(()=>{});
-    }
-  }
-  canvas.addEventListener('touchend', tryFullscreen, { once: true });
+  // Fullscreen helper
+  canvas.addEventListener('touchend', () => {
+    if (canvas.requestFullscreen && !document.fullscreenElement) canvas.requestFullscreen().catch(()=>{});
+  }, { once: true });
 
   // ────────────────────────────────────────────────
-  //  Boot
+  // Start
   // ────────────────────────────────────────────────
   resetBall();
   loop();
