@@ -3,318 +3,432 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Ultimate Cricket Game – Mobile Ready 🏏</title>
+  <title>Stick Cricket Supreme</title>
   <style>
     body {
-      margin: 0;
-      padding: 10px;
-      text-align: center;
-      background: #022c22;
-      color: white;
-      font-family: Arial, sans-serif;
-      touch-action: none; /* helps prevent double-tap zoom / scroll issues */
-      -webkit-user-select: none;
+      margin:0; padding:0;
+      background:#000;
+      color:#0f0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow:hidden;
+      touch-action: manipulation;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    h2 {
-      margin: 10px 0;
-      font-size: 1.6rem;
+    #game { display:block; background:#0a1f0a; }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
     }
-    canvas {
-      border: 4px solid #fff;
-      border-radius: 10px;
-      background: #16a34a;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      display: block;
-      margin: 15px auto;
-      max-width: 100%;
-      touch-action: none;
+    #ui {
+      position: absolute;
+      top: 8px; left: 12px; right: 12px;
+      z-index: 15;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.4rem;
+      text-shadow: 0 0 6px #000, 0 0 12px #000;
     }
-    #controls {
-      margin: 15px 0;
+    #status {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 6.5vw;
+      font-weight: bold;
+      color: #ffeb3b;
+      text-shadow: 0 0 20px #000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    #menu, #gameover {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #0f0;
+      z-index: 30;
+      pointer-events: all;
+    }
+    #menu h1, #gameover h1 {
+      font-size: 9vw;
+      margin: 0.2em 0;
+      text-shadow: 0 0 15px #0f0;
     }
     button {
-      margin: 6px;
-      padding: 12px 24px;
-      font-size: 1.1rem;
+      font-size: 5.5vw;
+      padding: 14px 32px;
+      margin: 12px;
+      min-width: 220px;
+      background: #111;
+      color: #0f0;
+      border: 3px solid #0f0;
+      border-radius: 12px;
       cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      background: #eab308;
-      color: #111;
-      font-weight: bold;
+      transition: all 0.15s;
     }
-    button:hover { background: #facc15; }
-    #ui {
-      font-size: 1.4rem;
-      margin: 10px 0;
+    button:active { transform: scale(0.94); background: #0a300a; }
+    #stats {
+      font-size: 4.2vw;
+      line-height: 1.5;
+      text-align: center;
+      margin: 1em 0;
+      color: #8f8;
     }
-    #message {
-      font-size: 1.5rem;
-      font-weight: bold;
-      min-height: 35px;
-      color: #fbbf24;
+    #controls {
+      position: absolute;
+      bottom: 16px;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      z-index: 10;
+      pointer-events: all;
     }
-    @media (max-width: 600px) {
-      h2 { font-size: 1.4rem; }
-      button { padding: 10px 20px; font-size: 1rem; }
+    .shot-btn {
+      font-size: 5vw;
+      padding: 16px 28px;
+      background: rgba(20,40,20,0.7);
+      border: 2px solid #0c5;
+      border-radius: 50%;
+      width: 110px; height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    #straightBtn { font-size: 4.8vw; width: 140px; height: 140px; border-color: #0f0; }
+
+    @media (orientation: landscape) {
+      #controls { bottom: 8px; }
+      .shot-btn { width: 90px; height: 90px; font-size: 4vw; }
+      #straightBtn { width: 120px; height: 120px; }
     }
   </style>
 </head>
 <body>
+  <canvas id="game"></canvas>
 
-<h2>🏏 Ultimate Cricket Game</h2>
+  <div id="overlay">
+    <div id="ui">
+      <div>Score: <span id="score">0</span></div>
+      <div>Wickets: <span id="wickets">0</span>/3</div>
+    </div>
 
-<div id="controls">
-  <button onclick="startGame()">▶️ Play</button>
-  <button onclick="restartGame()">🔄 Restart</button>
-  <button onclick="endGame()">❌ End</button>
-</div>
+    <div id="status"></div>
 
-<div id="ui">
-  Score: <span id="score">0</span>  |  Wickets: <span id="wickets">3</span>
-</div>
-<div id="message"></div>
+    <div id="controls" style="display:none">
+      <div class="shot-btn" id="leftBtn">COVER</div>
+      <div class="shot-btn" id="straightBtn">DRIVE</div>
+      <div class="shot-btn" id="rightBtn">LOFT</div>
+    </div>
 
-<canvas id="game"></canvas>
+    <div id="menu">
+      <h1>STICK CRICKET</h1>
+      <button id="startBtn">START GAME</button>
+      <div style="margin-top:2em; font-size:4vw; opacity:0.7;">
+        Tap zones or buttons to play<br>
+        Try to beat your high score!
+      </div>
+    </div>
+
+    <div id="gameover" style="display:none">
+      <h1>GAME OVER</h1>
+      <div id="stats"></div>
+      <button id="restartBtn">PLAY AGAIN</button>
+    </div>
+  </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const messageEl = document.getElementById("message");
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const wicketsEl = document.getElementById('wickets');
+  const statusEl = document.getElementById('status');
+  const menu = document.getElementById('menu');
+  const gameover = document.getElementById('gameover');
+  const controls = document.getElementById('controls');
+  const statsEl = document.getElementById('stats');
 
-// Responsive canvas sizing
-function resizeCanvas() {
-  const aspect = 4 / 5; // taller than wide for cricket pitch feel
-  let w = Math.min(window.innerWidth - 40, 500);
-  let h = w / aspect;
-  if (h > window.innerHeight * 0.65) {
-    h = window.innerHeight * 0.65;
-    w = h * aspect;
-  }
-  canvas.width = w;
-  canvas.height = h;
-  // Update game positions based on new size
-  bat.x = canvas.width / 2 - 40;
-  bat.y = canvas.height - 100;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+  let state = 'menu'; // menu | playing | gameover
+  let score = 0;
+  let wickets = 0;
+  let ballsFaced = 0;
+  let sixes = 0;
+  let fours = 0;
+  let highScore = Number(localStorage.getItem('stickCricketHigh') || 0);
 
-// Sounds
-const hitSound  = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
-const missSound = new Audio("https://www.soundjay.com/misc/sounds/fail-buzzer-02.mp3");
-const outSound  = new Audio("https://www.soundjay.com/misc/sounds/fail-buzzer-02.mp3");
+  let ball = { x:0, y:0, vx:0, vy:0, radius:14 };
+  const batsman = { x:0, y:0, batAngle:0, swinging:false, swingTimer:0 };
+  let shotType = 'straight';
 
-// Images (small size → fast load)
-const batsmanImg = new Image(); batsmanImg.src = "https://i.imgur.com/6X4Z6bH.png";
-const bowlerImg  = new Image(); bowlerImg.src  = "https://i.imgur.com/8Qf6G7D.png";
+  const perfectZone = { min:280, max:360 };
+  const goodZone   = { min:210, max:430 };
 
-// Game state
-let score = 0, wickets = 3;
-let gameRunning = false, gameOver = false;
-let bat = { x: 0, y: 0, angle: 0, swinging: false };
-let ball = { x: 0, y: 60, speed: 3.5, size: 10 };
-let canHit = false;
-let lastHitTime = 0;
+  // ────────────────────────────────────────────────
+  //  Resize & Layout
+  // ────────────────────────────────────────────────
+  function resize() {
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    const ratio = 16/9.3;
 
-// ── Controls (Keyboard + Touch) ────────────────────────────────
-const keys = {};
-
-document.addEventListener("keydown", e => {
-  if (!gameRunning || gameOver) return;
-  keys[e.code] = true;
-  if (canHit && Date.now() - lastHitTime > 500) {
-    if (e.code === "ArrowLeft")  hitBall("LEFT");
-    if (e.code === "ArrowRight") hitBall("RIGHT");
-    if (e.code === "Space")      hitBall("STRAIGHT");
-  }
-});
-
-document.addEventListener("keyup",   e => keys[e.code] = false);
-
-// Touch controls ─ swipe on lower half
-let touchStartX = 0, touchStartY = 0;
-
-canvas.addEventListener("touchstart", e => {
-  e.preventDefault();
-  if (!gameRunning || gameOver) return;
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-});
-
-canvas.addEventListener("touchend", e => {
-  e.preventDefault();
-  if (!gameRunning || gameOver || !canHit || Date.now() - lastHitTime < 500) return;
-
-  const touch = e.changedTouches[0];
-  const dx = touch.clientX - touchStartX;
-  const dy = touch.clientY - touchStartY;
-
-  // Only consider swipes on lower ~60% of screen
-  if (touchStartY > canvas.getBoundingClientRect().top + canvas.height * 0.4) {
-    if (Math.abs(dx) > 40 || Math.abs(dy) > 30) {
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx < 0) hitBall("LEFT");
-        else        hitBall("RIGHT");
-      } else if (dy < -30) {
-        hitBall("STRAIGHT");
-      }
-    }
-  }
-});
-
-// ── Game Logic ─────────────────────────────────────────────────
-function startGame() {
-  if (gameRunning) return;
-  score = 0; wickets = 3;
-  gameOver = false; gameRunning = true;
-  ball.speed = 3.2 + Math.random() * 0.8;
-  resetBall();
-  messageEl.textContent = "Swipe ← → ↑ or use keys!";
-  messageEl.style.color = "#22c55e";
-  updateUI();
-}
-
-function restartGame() { startGame(); }
-
-function endGame() {
-  gameRunning = false; gameOver = true;
-  messageEl.textContent = "Game stopped";
-  alert("Game Ended! Score: " + score);
-}
-
-function hitBall(direction) {
-  canHit = false;
-  lastHitTime = Date.now();
-  bat.swinging = true;
-  bat.angle = 0;
-
-  const timingError = Math.abs(ball.y - bat.y);
-  let runs = 0, msg = "";
-
-  if      (timingError < 20) { runs = 6; msg = "SIX! 🚀"; }
-  else if (timingError < 40) { runs = 4; msg = "FOUR! ⚡"; }
-  else if (timingError < 70) { runs = 2; msg = "Double"; }
-  else if (timingError < 110){ runs = 1; msg = "Single"; }
-  else                       { runs = 0; msg = "Miss!"; }
-
-  if (runs > 0) {
-    score += runs;
-    hitSound.currentTime = 0; hitSound.play();
-    messageEl.textContent = `${msg} +${runs}`;
-    messageEl.style.color = runs >= 4 ? "#22c55e" : "#eab308";
-
-    if (direction === "LEFT")  ball.x -= 90;
-    if (direction === "RIGHT") ball.x += 90;
-  } else {
-    missSound.currentTime = 0; missSound.play();
-    messageEl.textContent = "Missed 😓";
-    messageEl.style.color = "#ef4444";
-  }
-
-  updateUI();
-  setTimeout(resetBall, 500);
-}
-
-function loseWicket() {
-  wickets--;
-  outSound.currentTime = 0; outSound.play();
-  messageEl.textContent = "OUT! ☠️";
-  messageEl.style.color = "#dc2626";
-  updateUI();
-
-  if (wickets <= 0) {
-    gameOver = true; gameRunning = false;
-    setTimeout(() => {
-      alert("All Out! Final Score: " + score + "\nGreat effort! 🏏");
-      messageEl.textContent = "Game Over – All Out";
-    }, 400);
-  } else {
-    setTimeout(resetBall, 700);
-  }
-}
-
-function resetBall() {
-  ball.y = 60;
-  ball.x = canvas.width * 0.3 + Math.random() * (canvas.width * 0.4);
-  canHit = false;
-  bat.angle = 0; bat.swinging = false;
-  messageEl.textContent = "";
-}
-
-function updateUI() {
-  document.getElementById("score").innerText = score;
-  document.getElementById("wickets").innerText = wickets;
-}
-
-// ── Draw ───────────────────────────────────────────────────────
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Sky + pitch + grass
-  ctx.fillStyle = "#60a5fa"; ctx.fillRect(0, 0, canvas.width, canvas.height * 0.3);
-  ctx.fillStyle = "#c2b280"; ctx.fillRect(canvas.width*0.25, 40, canvas.width*0.5, canvas.height);
-  ctx.fillStyle = "#16a34a"; ctx.fillRect(0, canvas.height*0.3, canvas.width, canvas.height*0.7);
-
-  // Wickets
-  ctx.fillStyle = "#fff";
-  for (let off of [-12, 0, 12]) {
-    ctx.fillRect(canvas.width/2 + off, 80, 6, 35);
-    ctx.fillRect(canvas.width/2 + off, bat.y - 10, 6, 35);
-  }
-
-  if (gameRunning && !gameOver) {
-    // Bowler
-    ctx.drawImage(bowlerImg, canvas.width/2 - 50, 10, 100, 100);
-
-    // Batsman swing
-    ctx.save();
-    ctx.translate(bat.x + 40, bat.y + 50);
-    if (bat.swinging) {
-      bat.angle += 10;
-      if (bat.angle > 75) bat.swinging = false;
+    if (w / h > ratio) {
+      canvas.height = h;
+      canvas.width = Math.round(h * ratio);
     } else {
-      bat.angle *= 0.78;
+      canvas.width = w;
+      canvas.height = Math.round(w / ratio);
     }
-    ctx.rotate(bat.angle * Math.PI / 180);
-    ctx.drawImage(batsmanImg, -50, -60, 100, 100);
-    ctx.restore();
 
-    // Ball
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI*2);
-    ctx.fillStyle = "#fefefe"; ctx.fill();
-    ctx.strokeStyle = "#ca8a04"; ctx.lineWidth = 2.5; ctx.stroke();
+    batsman.x = canvas.width * 0.18;
+    batsman.y = canvas.height * 0.64;
 
-    ball.y += ball.speed;
+    ball.x = canvas.width + 80;
+    ball.y = 140 + Math.random() * (canvas.height * 0.38);
+  }
+  window.addEventListener('resize', resize);
+  resize();
 
-    // Hit window
-    if (ball.y > bat.y - 90 && ball.y < bat.y - 15) {
-      if (!canHit) {
-        canHit = true;
-        messageEl.textContent = "NOW!";
-        messageEl.style.color = "#ef4444";
+  // ────────────────────────────────────────────────
+  //  Game Logic
+  // ────────────────────────────────────────────────
+  function resetBall() {
+    ballsFaced++;
+    ball.x = canvas.width + 80;
+    ball.y = 120 + Math.random() * (canvas.height * 0.42);
+    ball.vx = - (7 + Math.random() * 5.5);
+    ball.vy = (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random() * 3.5);
+  }
+
+  function startGame() {
+    score = 0; wickets = 0; ballsFaced = 0; sixes = 0; fours = 0;
+    scoreEl.textContent = 0;
+    wicketsEl.textContent = 0;
+    state = 'playing';
+    menu.style.display = 'none';
+    gameover.style.display = 'none';
+    controls.style.display = 'flex';
+    resetBall();
+  }
+
+  function endGame() {
+    state = 'gameover';
+    controls.style.display = 'none';
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('stickCricketHigh', highScore);
+    }
+
+    statsEl.innerHTML = `
+      Score: <b>${score}</b><br>
+      ${score > highScore ? '<span style="color:#ff0">NEW HIGH SCORE!</span><br>' : ''}
+      High Score: ${highScore}<br><br>
+      Balls faced: ${ballsFaced}<br>
+      Fours: ${fours}  •  Sixes: ${sixes}<br>
+      Strike rate: ${ballsFaced ? Math.round(score / ballsFaced * 100) : 0}
+    `;
+    gameover.style.display = 'flex';
+  }
+
+  function swing(type) {
+    if (state !== 'playing' || batsman.swinging) return;
+    shotType = type;
+    batsman.swinging = true;
+    batsman.batAngle = 75;
+    batsman.swingTimer = 0;
+  }
+
+  // ────────────────────────────────────────────────
+  //  Update & Draw
+  // ────────────────────────────────────────────────
+  function update() {
+    if (state !== 'playing') return;
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    if (ball.y < 80 || ball.y > canvas.height - 80) ball.vy *= -0.65;
+
+    if (batsman.swinging) {
+      batsman.batAngle -= 14;
+      batsman.swingTimer++;
+      if (batsman.swingTimer > 7) {
+        batsman.swinging = false;
+        batsman.batAngle = 0;
       }
     }
 
-    // Missed / out
-    if (ball.y > bat.y + 50) {
-      if (canHit) {
-        messageEl.textContent = "Too late!";
-        messageEl.style.color = "#d97706";
+    // missed ball → wicket
+    if (ball.x < batsman.x - 100) {
+      wickets++;
+      wicketsEl.textContent = wickets;
+      showStatus("OUT!", "red", 1400);
+
+      if (wickets >= 3) {
+        endGame();
       } else {
-        loseWicket();
+        resetBall();
       }
+    }
+
+    // hit detection
+    if (batsman.swinging &&
+        ball.x > batsman.x - 10 &&
+        ball.x < batsman.x + 140 &&
+        Math.abs(ball.y - (batsman.y - 45)) < 85) {
+
+      let runs = 0;
+      let msg = "";
+      let color = "#ffeb3b";
+
+      if (ball.y >= perfectZone.min && ball.y <= perfectZone.max) {
+        runs = (shotType === 'right') ? 6 : 4;
+        msg = runs === 6 ? "SIX!" : "FOUR!";
+        color = runs === 6 ? "#0f0" : "#ffeb3b";
+        if (runs === 6) sixes++; else fours++;
+      } else if (ball.y >= goodZone.min && ball.y <= goodZone.max) {
+        runs = shotType === 'left' ? 2 : (shotType === 'right' ? 4 : 3);
+        msg = runs + " runs";
+        if (runs === 4) fours++;
+      } else {
+        runs = 1;
+        msg = "Single";
+      }
+
+      score += runs;
+      scoreEl.textContent = score;
+      showStatus(msg, color, 1600);
+
+      // send ball away
+      ball.vx = 12 + Math.random() * 14;
+      ball.vy = - (shotType === 'right' ? 14 : 7) + Math.random() * 10 - 5;
+
       resetBall();
     }
   }
 
-  requestAnimationFrame(draw);
-}
+  function showStatus(text, color, ms) {
+    statusEl.textContent = text;
+    statusEl.style.color = color;
+    statusEl.style.opacity = 1;
+    setTimeout(() => { statusEl.style.opacity = 0; }, ms - 400);
+  }
 
-draw();
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // sky
+    const grad = ctx.createLinearGradient(0,0,0,canvas.height*0.75);
+    grad.addColorStop(0, '#4fc3f7');
+    grad.addColorStop(1, '#81d4fa');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.75);
+
+    // pitch
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(0, canvas.height * 0.74, canvas.width, canvas.height);
+
+    // grass hint
+    ctx.fillStyle = 'rgba(0,80,0,0.4)';
+    ctx.fillRect(0, canvas.height * 0.74, canvas.width, canvas.height);
+
+    // wickets
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 7;
+    const wx = batsman.x + 45;
+    ctx.beginPath();
+    ctx.moveTo(wx-22, batsman.y-90); ctx.lineTo(wx-22, batsman.y+25);
+    ctx.moveTo(wx,    batsman.y-90); ctx.lineTo(wx,    batsman.y+25);
+    ctx.moveTo(wx+22, batsman.y-90); ctx.lineTo(wx+22, batsman.y+25);
+    ctx.stroke();
+
+    // batsman
+    ctx.fillStyle = '#0f0';
+    ctx.beginPath(); ctx.arc(batsman.x, batsman.y-85, 26, 0, Math.PI*2); ctx.fill();
+    ctx.fillRect(batsman.x-16, batsman.y-60, 32, 85);
+    ctx.lineWidth = 12; ctx.strokeStyle = '#0f0';
+    ctx.beginPath(); ctx.moveTo(batsman.x-8, batsman.y+20); ctx.lineTo(batsman.x-60, batsman.y+95); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(batsman.x+8, batsman.y+20); ctx.lineTo(batsman.x+40, batsman.y+100); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(batsman.x-12, batsman.y-35); ctx.lineTo(batsman.x+55, batsman.y-15); ctx.stroke();
+
+    // bat
+    ctx.save();
+    ctx.translate(batsman.x + 38, batsman.y - 35);
+    ctx.rotate(batsman.batAngle * Math.PI / 180);
+    ctx.fillStyle = '#6d4c41';
+    ctx.fillRect(-8, -18, 110, 36);
+    ctx.restore();
+
+    // ball + trail
+    ctx.fillStyle = 'rgba(220,40,40,0.35)';
+    ctx.beginPath(); ctx.arc(ball.x + ball.vx*1.8, ball.y + ball.vy*1.8, ball.radius*1.8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#d32f2f';
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fill();
+
+    // shot arc
+    ctx.strokeStyle = shotType === 'left' ? '#2196f3' : shotType === 'right' ? '#ff9800' : '#0f0';
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.arc(batsman.x + 55, batsman.y - 55, 70, Math.PI*0.75, Math.PI*0.25, true);
+    ctx.stroke();
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ────────────────────────────────────────────────
+  //  Controls
+  // ────────────────────────────────────────────────
+  document.getElementById('startBtn').onclick = startGame;
+  document.getElementById('restartBtn').onclick = startGame;
+
+  function onSwingLeft()  { swing('left'); }
+  function onSwingStr()   { swing('straight'); }
+  function onSwingRight() { swing('right'); }
+
+  document.getElementById('leftBtn').addEventListener('touchstart', e => { e.preventDefault(); onSwingLeft(); });
+  document.getElementById('straightBtn').addEventListener('touchstart', e => { e.preventDefault(); onSwingStr(); });
+  document.getElementById('rightBtn').addEventListener('touchstart', e => { e.preventDefault(); onSwingRight(); });
+
+  // Keyboard support
+  window.addEventListener('keydown', e => {
+    if (e.code === 'ArrowLeft'  || e.code === 'KeyA') onSwingLeft();
+    if (e.code === 'Space'      || e.code === 'ArrowUp' || e.code === 'KeyW') onSwingStr();
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') onSwingRight();
+  });
+
+  // Tap to start
+  canvas.addEventListener('touchstart', e => {
+    if (state === 'menu') {
+      e.preventDefault();
+      startGame();
+    }
+  }, { passive: false });
+
+  // Optional fullscreen
+  function tryFullscreen() {
+    if (canvas.requestFullscreen && document.fullscreenElement === null) {
+      canvas.requestFullscreen().catch(()=>{});
+    }
+  }
+  canvas.addEventListener('touchend', tryFullscreen, { once: true });
+
+  // ────────────────────────────────────────────────
+  //  Boot
+  // ────────────────────────────────────────────────
+  resetBall();
+  loop();
 </script>
 </body>
 </html>
